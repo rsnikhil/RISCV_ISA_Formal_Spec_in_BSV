@@ -1,0 +1,103 @@
+<h1>RISCV ISA Formal Spec in BSV</h1>
+
+<p>A formal spec of the RISC-V Instruction Set Architecture, written in Bluespec BSV (executable, synthesizable).</p>
+
+<p>MIT License (see LICENSE.txt)</p>
+
+<p>This is a first cut at writing a formal specification of the RISC-V ISA in BSV. <br />
+Text documents describing the ISA may be found at <a href="https://riscv.org/">The RISC-V Foundation</a>.</p>
+
+<p>This first cut only covers RV32I and RV64I user-mode instructions,
+plus a few standard machine-mode registers that save exception
+information in case of exceptions.  It will be extended in future to
+cover other user-level features (M, A, F, D, etc.) and other privilege
+levels (machine, supervisor and hypervisor).</p>
+
+<p>This spec is executable, both in simulation and in hardware.
+Simulation vehicles include Bluespec Bluesim and Verilog simulators.
+Hardware execution would typically be on an FPGA, where it could be
+used as a "tandem verifier" for an actual CPU implementation.</p>
+
+<p>In this repo we provide the BSV source codes for the spec itself.  The
+source code contains detailed comments.</p>
+
+<p>We also provide a pre-built Bluesim simulation executable, where the
+spec has been embedded into a larger "SoC" system involving a memory
+system and a UART, so that you can run it on RISC-V ELF executables
+compiled for "bare metal" execution (no OS).  We provide a few
+pre-built ELF files for this purpose, as examples.  The simulation
+executable should run on any 64-bit Linux.</p>
+
+<hr />
+
+<h2>Repository contents:</h2>
+
+<ul>
+<li><p><code>src_BSV/</code></p>
+
+<p>This is the spec, written in BSV, in the following files:</p>
+
+<ul>
+<li><p><code>ISA_Decls.bsv</code>     Specifies instruction encodings</p></li>
+<li><p><code>RISCV_Spec.bsv</code>    Specifies instruction semantics</p></li>
+</ul></li>
+<li><p><code>Bluesim/</code></p>
+
+<p>Contains a pre-built 64-bit Linux executable using Bluespec, Inc.'s
+Bluesim simulator.  The Makefile allows running the simulator on any
+of the pre-compiled ELF files in <code>RISCV_Programs/</code> directory.</p>
+
+<p>For example, <code>$ make do_test_hello</code> runs the "Hello World!" program.</p></li>
+<li><p><code>RISCV_Programs/</code></p>
+
+<ul>
+<li><p><code>C_tests_RV32IM/</code></p></li>
+<li><p><code>asm_tests_RV32IM/</code></p></li>
+</ul>
+
+<p><p>These contain a number of sub-directories (e.g., "hello/",
+containing a "Hello World!" program).  Each directory contains a
+.c (C) or .S (assembly) source file, a pre-compiled RISC-V RV32IM
+ELF executable, and a .text dis-assembly of the ELF file.</p></li>
+</ul>
+<hr /></p>
+
+<h2>Running the Bluesim simulator on RISC-V ELF files</h2>
+
+<p>You should be in the Bluesim directory: <code>$ cd Bluesim</code></p>
+
+<p>To run an individual program, e.g., "Hello World!": <code>$ make do_test_hello</code></p>
+
+<p>To run all programs (file <code>sample_transcript</code> is a transcript of this): <code>$ make do_tests</code></p>
+
+<p>In <code>sample_transcript</code> you will see that for two programs, <code>print</code> and
+<code>intOpsTest</code>, execution prints an error message like this:</p>
+
+<pre><code>    RISCV_Spec.fa_do_exception: epc = 0x11fec, exc_code = 0x2, badaddr = 0xaaaaaaaa
+</code></pre>
+
+<p>This is because those two ELF executables contain the <code>REMU</code>
+instruction which is not part of the base I instruction set (they are
+in the <code>M</code> extension), and the spec correctly identifies them as
+illegal instructions.</p>
+
+<p>If you set the environment variable SIM_VERBOSITY (to 1, 2, ...) it
+will produce increasingly detailed simulation traces indicating
+activity on a clock-by-clock basis in the CPU pipeline, caches,
+interconnect fabric and memory controller.</p>
+
+<p>Note: The <code>make</code> commands invoke the Bluesim executable: <code>$ exe_d</code></p>
+
+<p>If you provide the flag <code>-V</code> it will dump VCDs waveforms to the file <code>dump.vcd</code>.</p>
+
+<p>If you provide the flag <code>-V foo.vcd</code> it will dump VCDs waveforms to the file <code>foo.vcd</code>.</p>
+
+<hr />
+
+<h2>References</h2>
+
+<p>Bluespec support: email <code>support@bluespec.com</code></p>
+
+<p>Bluespec, Inc. web site <a href="http://www.bluespec.com">www.bluespec.com</a>.</p>
+
+<p>RISC-V Foundation web site <a href="https://riscv.org">www.riscv.org</a></p>
