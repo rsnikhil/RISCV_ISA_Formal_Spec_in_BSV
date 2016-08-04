@@ -1,5 +1,5 @@
-# RISCV_ISA_Formal_Spec_in_BSV
-A formal spec of the RISC-V Instruction Set Architecture, written in Bluespec BSV (executable, synthesizable)
+# RISCV ISA Formal Spec in BSV
+A formal spec of the RISC-V Instruction Set Architecture, written in Bluespec BSV (executable, synthesizable).
 
 This is a first cut at writing a formal specification of the RISC-V ISA in BSV.  
 Text documents describing the ISA may be found at [The RISC-V Foundation](https://riscv.org/).
