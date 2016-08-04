@@ -2,7 +2,7 @@
 A formal spec of the RISC-V Instruction Set Architecture, written in Bluespec BSV (executable, synthesizable)
 
 This is a first cut at writing a formal specification of the RISC-V ISA in BSV.  
-Text documents describing the ISA may be found at [link](https://riscv.org/).
+Text documents describing the ISA may be found at [The RISC-V Foundation](https://riscv.org/).
 
 This first cut only covers RV32I and RV64I user-mode instructions, plus a few standard machine-mode registers that save exception information in case of exceptions.  It will be extended in future to cover other privilege levels.
 
