@@ -3,91 +3,83 @@ A formal spec of the RISC-V Instruction Set Architecture, written in Bluespec BS
 
 MIT License (see LICENSE.txt)
 
-This is a first cut at writing a formal specification of the RISC-V ISA in BSV.  
-Text documents describing the ISA may be found at [The RISC-V Foundation](https://riscv.org/).
+This is a formal specification, written in BSV, of (a subset of) the
+RISC-V ISA.  The original RISC-V specs (written in English text) are
+the following two documents at [The RISC-V
+Foundation](https://riscv.org/):
 
-This first cut only covers RV32I and RV64I user-mode instructions,
-plus a few standard machine-mode registers that save exception
-information in case of exceptions.  It will be extended in future to
-cover other user-level features (M, A, F, D, etc.) and other privilege
-levels (machine, supervisor and hypervisor).
+>    The RISC-V Instruction Set Manual  
+>    Volume I: User-Level ISA  
+>    Document Version 2.2  
+>    Editors: Andrew Waterman , Krste Asanovic  
+>    May 7, 2017
+
+
+>    The RISC-V Instruction Set Manual  
+>    Volume II: Privileged Architecture  
+>    Privileged Architecture Version 1.10  
+>    Editors: Andrew Waterman , Krste Asanovic  
+>    May 7, 2017
+
+This formal spec covers:
+
+   - RV32IM and RV64IM, i.e., the 32-bit and 64-bit user-level
+        instruction sets ("I"), including integer
+        multiply/ divide/ remainder ("M").
+
+   - A subset of machine-level privileged instructions and CSRs,
+        including trap handling but excluding physical memory
+        protection and performance-monitoring.
+
+This formal spec will be extended in future to cover other user-level
+features (A, F, D, etc.) and other privilege levels (supervisor).
 
 This spec is executable, both in simulation and in hardware.
 Simulation vehicles include Bluespec Bluesim and Verilog simulators.
 Hardware execution would typically be on an FPGA, where it could be
 used as a "tandem verifier" for an actual CPU implementation.
 
-In this repo we provide the BSV source codes for the spec itself.  The
-source code contains detailed comments.
+In this repo we provide the BSV source codes for the spec.  The source
+code contains detailed comments.
 
-We also provide a pre-built Bluesim simulation executable, where the
-spec has been embedded into a larger "SoC" system involving a memory
-system and a UART, so that you can run it on RISC-V ELF executables
-compiled for "bare metal" execution (no OS).  We provide a few
-pre-built ELF files for this purpose, as examples.  The simulation
-executable should run on any 64-bit Linux.
+For simulation executables, please contact the author.
 
 ----------------------------------------------------------------
 
 ## Repository contents:
 
-* `src_BSV/`
+The specification is in the following BSV files:
 
-  This is the spec, written in BSV, in the following files:
+`ISA_Decls.bsv`  
+&nbsp; &nbsp; &nbsp; Specifies user-level instruction encodings.
 
-    * `ISA_Decls.bsv`     Specifies instruction encodings
+`ISA_Decls_Priv_M.bsv`  
+&nbsp; &nbsp; &nbsp; Specifies machile-level privilege CSRs and instruction encodings.
 
-    * `RISCV_Spec.bsv`    Specifies instruction semantics
+`RISCV_Spec.bsv`  
+&nbsp; &nbsp; &nbsp; The top-level of the spec, specifying instruction semantics.
 
+`RegFiles.bsv`  
+&nbsp; &nbsp; &nbsp; Specifies integer GPRs and CSRs
 
-* `Bluesim/`
+`IntMulDivRem_ALU.bsv`  
+&nbsp; &nbsp; &nbsp; Specifies ALU for "M" operation (Mul/Div/Rem)
 
-  Contains a pre-built 64-bit Linux executable using Bluespec, Inc.'s
-  Bluesim simulator.  The Makefile allows running the simulator on any
-  of the pre-compiled ELF files in `RISCV_Programs/` directory.
+In `RISCV_Spec.bsv`, the spec is encapsulated into module
+`mkRISCV_Spec` whose parameters include a register file and a memory,
+and whose interface includes hooks to control its execution from GDB.
+Inside the module the main action is in rules `rl_fetch` and
+`rl_exec`.  The latter invokes the top-level semantic function
+`fa_exec()`.
 
-  For example, `$ make do_test_hello` runs the "Hello World!" program.
-
-* `RISCV_Programs/`
-
-    * `C_tests_RV32IM/`
-
-    * `asm_tests_RV32IM/`
-
-    These contain a number of sub-directories (e.g., "hello/",
-    containing a "Hello World!" program).  Each directory contains a
-    .c (C) or .S (assembly) source file, a pre-compiled RISC-V RV32IM
-    ELF executable, and a .text dis-assembly of the ELF file.
-
-----------------------------------------------------------------
-## Running the Bluesim simulator on RISC-V ELF files
-
-You should be in the Bluesim directory: `$ cd Bluesim`
-
-To run an individual program, e.g., "Hello World!": `$ make do_test_hello`
-
-To run all programs (file `sample_transcript` is a transcript of this): `$ make do_tests`
-
-In `sample_transcript` you will see that for two programs, `print` and
-`intOpsTest`, execution prints an error message like this:
-
-        RISCV_Spec.fa_do_exception: epc = 0x11fec, exc_code = 0x2, badaddr = 0xaaaaaaaa
-
-This is because those two ELF executables contain the `REMU`
-instruction which is not part of the base I instruction set (they are
-in the `M` extension), and the spec correctly identifies them as
-illegal instructions.
-
-If you set the environment variable SIM_VERBOSITY (to 1, 2, ...) it
-will produce increasingly detailed simulation traces indicating
-activity on a clock-by-clock basis in the CPU pipeline, caches,
-interconnect fabric and memory controller.
-
-Note: The `make` commands invoke the Bluesim executable: `$ exe_d`
-
-If you provide the flag `-V` it will dump VCDs waveforms to the file `dump.vcd`.
-
-If you provide the flag `-V foo.vcd` it will dump VCDs waveforms to the file `foo.vcd`.
+We deliberately split LD, ST, FENCE.I and FENCE instructions into two
+phases (instead of treating them as pure functions) in order to allow
+access to shared memory to be interleaved with other hardware threads.
+The second phase of these instructions is seen in the rules
+`rl_exec_LD_response`,
+`rl_exec_ST_response`
+`rl_exec_FENCE_I_response`,
+and `rl_exec_FENCE_response`.
 
 ----------------------------------------------------------------
 ## References
@@ -97,4 +89,3 @@ Bluespec support: email `support@bluespec.com`
 Bluespec, Inc. web site [www.bluespec.com](http://www.bluespec.com).
 
 RISC-V Foundation web site [www.riscv.org](https://riscv.org)
-
