@@ -37,27 +37,18 @@ Foundation</a>:</p>
 <p>This formal spec will be extended in future to cover other user-level
 features (A, F, D, etc.) and other privilege levels (supervisor).</p>
 
-<p>This spec is executable, both in simulation and in hardware.
-Simulation vehicles include Bluespec Bluesim and Verilog simulators.
-Hardware execution would typically be on an FPGA, where it could be
-used as a "tandem verifier" for an actual CPU implementation.</p>
-
-<p>In this repo we provide the BSV source codes for the spec.  The source
-code contains detailed comments.</p>
-
-<p>For simulation executables, please contact the author.</p>
-
 <hr />
 
-<h2>Repository contents:</h2>
+<h2>Source codes</h2>
 
-<p>The specification is in the following BSV files:</p>
+<p>The spec source code files are in the RISCV_Spec/ directory.  The
+source code contains detailed comments.</p>
 
 <p><code>ISA_Decls.bsv</code> <br />
 &nbsp; &nbsp; &nbsp; Specifies user-level instruction encodings.</p>
 
 <p><code>ISA_Decls_Priv_M.bsv</code> <br />
-&nbsp; &nbsp; &nbsp; Specifies machile-level privilege CSRs and instruction encodings.</p>
+&nbsp; &nbsp; &nbsp; Specifies machine-level privilege CSRs and instruction encodings.</p>
 
 <p><code>RISCV_Spec.bsv</code> <br />
 &nbsp; &nbsp; &nbsp; The top-level of the spec, specifying instruction semantics.</p>
@@ -83,6 +74,132 @@ The second phase of these instructions is seen in the rules
 <code>rl_exec_ST_response</code>
 <code>rl_exec_FENCE_I_response</code>,
 and <code>rl_exec_FENCE_response</code>.</p>
+
+<hr />
+
+<h2>Executability</h2>
+
+<p>This spec is executable, both in simulation and in hardware.
+Simulation vehicles include Bluespec Bluesim and Verilog simulators.
+Hardware execution would typically be on an FPGA, where it could be
+used as a "tandem verifier" for an actual CPU implementation.</p>
+
+<p>In this repo we provide a pre-built executable simulator:</p>
+
+<blockquote>
+  <p><code>Simulator/exe_hw_d</code></p>
+</blockquote>
+
+<p>In this executable:</p>
+
+<blockquote>
+  <p>The CPU connects to an I-Cache and a D-Cache <br />
+   The caches connect to an AXI4-like fabric <br />
+   The AXI4-like fabric connects to a Memory and a UART
+   (stdio of a program running on the CPU is directed to the UART)</p>
+</blockquote>
+
+<p>To avoid overwhelming the reader, we do not provide all this extra
+infrastructure (which is quite substantial, including a Debug Module
+that can connect to GDB, and more). The <code>RISCV_Spec/</code> directory only
+contains the code for the CPU, and therefore you will not be able to
+re-build the excutable.</p>
+
+<hr />
+
+<h2>Running the executable on example C programs</h2>
+
+<p>We have provided a number of example C programs, and their
+pre-compiled ELF files etc in directories like these:</p>
+
+<blockquote>
+  <p><code>Test_Programs/hello</code>     &nbsp; &nbsp; &nbsp;    (Hello World!) <br />
+   <code>Test_Programs/qsort</code>     &nbsp; &nbsp; &nbsp;    (Quicksort) <br />
+   <code>Test_Programs/towers</code>    &nbsp; &nbsp; &nbsp;    (Towers of Hanoi)  </p>
+</blockquote>
+
+<p>Each directory contains a number of files.  For example, in the
+<code>hello</code> directory you will see:</p>
+
+<blockquote>
+  <p><code>hello.c</code></p>
+</blockquote>
+
+<p>This is the orginal C source code.</p>
+
+<blockquote>
+  <p><code>hello</code></p>
+</blockquote>
+
+<p>This is an ELF file, produced by using gcc to compile the C program
+for a bare-metal RISC-V RV32IM target (i.e., not Linux target).  To
+recreate an ELF file you will have to build yourself a RISC-V Gnu tool
+chain.  Our bare-metal ELF files have startup code that start
+execution at PC = 0x200, and connect stdio to the UART.</p>
+
+<blockquote>
+  <p><code>hello.text</code></p>
+</blockquote>
+
+<p>A text disassembly of the ELF program using the standard <code>objdump</code> Gnu
+tool (part of the RISC-V Gnu tool chain).</p>
+
+<blockquote>
+  <p><code>hello.mem_hex</code></p>
+</blockquote>
+
+<p>A memory contents file produced from the ELF file.  This is in
+standard Verilog 'Memory Hex' format, and represents the contents of
+memory when the RISC-V CPU starts executing.  See section below on
+ELF-to-hex conversion.</p>
+
+<p>To run an example program, in the top-level directory you can say:</p>
+
+<blockquote>
+  <p><code>make test_hello</code> <br />
+   <code>make test_qsort</code> <br />
+   <code>make test_towers</code>  </p>
+</blockquote>
+
+<p>As you will see from the simple Makefile in the top-level directory,
+it makes a symbolic link from <code>Mem_Model.hex</code> to one of the test
+program memhex files, and then runs <code>Simlator/exe_hw_d</code>.</p>
+
+<p>The output is more interesting if you turn on simulation verbosity:</p>
+
+<blockquote>
+  <p><code>make  SIM_VERBOSITY=1  test_hello</code>  &nbsp; &nbsp; &nbsp;    PC and instruction trace <br />
+   <code>make  SIM_VERBOSITY=2  test_hello</code>  &nbsp; &nbsp; &nbsp;    More detail  </p>
+</blockquote>
+
+<p>In each test program directory you will see transcripts of running the
+program at various verbosity levels:</p>
+
+<blockquote>
+  <p><code>transcript_hello_verbosity_0</code> <br />
+   <code>transcript_hello_verbosity_1</code> <br />
+   <code>transcript_hello_verbosity_2</code>    </p>
+</blockquote>
+
+<p>If you have a RISC-V toolchain, you can compile your own C program
+into an ELF file, convert it into a memhex file, and run the simulator
+on it.  Please contact us for details of the boilerplate code to start
+execution at PC 0x200 and to connect stdio to the UART.</p>
+
+<hr />
+
+<h2>ELF to Mem Hex file conversion</h2>
+
+<p>Many ELF-to-hex tools exist on the Web, but we have also provided a
+simple one in:</p>
+
+<blockquote>
+  <p><code>Tool_elf_to_hex/elf_to_hex.c</code></p>
+</blockquote>
+
+<p>Compile this file, and then execute it with two command-line
+arguments, the path/filename of the input ELF file, and the
+path/filename of the output memhex file.</p>
 
 <hr />
 

@@ -1,0 +1,13 @@
+ln -s -f  Test_Programs/hello/hello.mem_hex  Mem_Model.hex
+Simulator/exe_hw_d
+Warning: file 'Mem_Model.hex' for memory 'rf' has a gap at addresses 2768 to 524287.
+================================================================
+Bluespec RISC-V standalone system simulation v1.0.
+Copyright (c) 2017 Bluespec, Inc. All Rights Reserved.
+================================================================
+================================================================
+CPU: Bluespec  RISC-V Spec v2.0
+Copyright (c) 2016-2017 Bluespec, Inc. All Rights Reserved.
+================================================================
+Hello World!
+RISCV_Spec.fa_finish_jump: jump to current pc 0x00014030 (infinite jump loop); exiting

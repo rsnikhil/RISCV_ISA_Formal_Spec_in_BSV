@@ -1,0 +1,11 @@
+Warning: file 'Mem_Model.hex' for memory 'rf' has a gap at addresses 2755 to 524287.
+================================================================
+Bluespec RISC-V standalone system simulation v1.0.
+Copyright (c) 2017 Bluespec, Inc. All Rights Reserved.
+================================================================
+================================================================
+CPU: Bluespec  RISC-V Spec v2.0
+Copyright (c) 2016-2017 Bluespec, Inc. All Rights Reserved.
+================================================================
+Verify = ok
+RISCV_Spec.fa_finish_jump: jump to current pc 0x00014670 (infinite jump loop); exiting
