@@ -84,6 +84,10 @@ In this repo we provide a pre-built executable simulator:
 
 >    `Simulator/exe_hw_d`
 
+The executable was built and tested on Ubuntu 17.04, and also tested
+on Debian 8.9 (jessie). Hopefully it should run on any x86 64-bit
+Linux.
+
 In this executable:
 
 >    The CPU connects to an I-Cache and a D-Cache  
